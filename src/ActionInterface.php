@@ -7,12 +7,11 @@ use Aura\Web\Response;
 interface ActionInterface
 {
 	/**
-	 * Takes a response, modifies it, and returns it back for processing. All
-	 * data is expected to be assigned to the response content as an array.
-	 * Formatting will be handled by a separate process.
+	 * Takes a response object and returns an array of data. Formatting will be
+	 * handled by a Presenter.
 	 *
 	 * @param Response $response
-	 * @return Response
+	 * @return array
 	 */
 	public function __invoke(Response $response);
 

@@ -6,5 +6,16 @@ use Aura\Web\Response;
 
 interface PresenterInterface
 {
-	public function run(Response $response, array $allowed_formats, $view = null);
+	/**
+	 * @param array  $data
+	 * @param string $format
+	 * @param string $view
+	 * @return string
+	 */
+	public function run($data, $format, $view = null);
+
+	/**
+	 * @return array
+	 */
+	public function getAvailableFormats();
 }

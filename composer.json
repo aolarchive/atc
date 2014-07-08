@@ -16,7 +16,8 @@
 	},
 	"autoload": {
 		"psr-4": {
-			"Aol\\Atc\\": "src/"
+			"Aol\\Atc\\": "src/",
+			"Aol\\AtcExample\\": "example/"
 		}
 	}
 }

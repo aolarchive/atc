@@ -8,19 +8,20 @@ class Exception extends \Exception implements ActionInterface
 {
 	protected $http_code = 500;
 	protected $view = 'errors/500';
+
 	/**
 	 * Takes a response, modifies it, and returns it back for processing. All
 	 * data is expected to be assigned to the response content as an array.
 	 * Formatting will be handled by a separate process.
 	 *
 	 * @param Response $response
-	 * @return Response
+	 * @return array
 	 */
 	public function __invoke(Response $response)
 	{
-		$response->status->set($this->http_code);
+		$response->status->setCode($this->http_code);
 
-		return $response;
+		return [];
 	}
 
 	/**

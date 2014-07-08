@@ -14,7 +14,7 @@ use Psr\Log\LoggerInterface;
 
 abstract class Dispatch
 {
-	/** @var \Aol\Atc\ActionFactory */
+	/** @var \Aol\Atc\ActionFactoryInterface */
 	private $action_factory;
 
 	/** @var \Psr\Log\LoggerInterface */
@@ -35,7 +35,7 @@ abstract class Dispatch
 	public function __construct(
 		Router $router,
 		WebFactory $web_factory,
-		ActionFactory $action_factory,
+		ActionFactoryInterface $action_factory,
 		PresenterInterface $presenter,
 		LoggerInterface $logger
 	) {
@@ -50,13 +50,14 @@ abstract class Dispatch
 
 	public function run()
 	{
+		$params   = [];
 		$view     = null;
 		$request  = $this->web_factory->newRequest();
 		$response = $this->web_factory->newResponse();
 
 		try {
 			// Get the matched route.
-			$route = $this->router->getMatchedRoute();
+			$route = $this->router->match($request->url->get(PHP_URL_PATH), $request->server->get());
 			if (!$route) {
 				$this->routeNotMatched($request);
 			}
@@ -70,7 +71,7 @@ abstract class Dispatch
 			}
 
 			// Run the response through the action.
-			$response = $action($response);
+			$data = $action($response);
 		} catch (\Exception $e) {
 			$this->debug('Caught ' . get_class($e) . ': ' . $e->getMessage());
 
@@ -82,15 +83,20 @@ abstract class Dispatch
 				$action = $e;
 			} // When all else fails get the default server error action.
 			else {
-				$action = $this->serverErrorAction();
+				$action = $this->serverErrorAction($response, $params);
 			}
 
-			$response = $action($response);
+			$data = $action($response);
 		}
 
 		// Make sure this is not a redirect and then run the response through the presenter.
-		if ($response->status->getCode() < 300 || $response->status->getCode > 399) {
-			$response = $this->presenter->run($response, $action->getAllowedFormats(), $action->getView());
+		if ($response->status->getCode() < 300 || $response->status->getCode() > 399) {
+			$available    = array_intersect($action->getAllowedFormats(), $this->presenter->getAvailableFormats());
+			$content_type = $request->accept->media->negotiate($available)->available->getValue();
+			$content      = $this->presenter->run($data, $content_type, $action->getView());
+
+			$response->content->set($content);
+			$response->content->setType($content_type);
 		}
 
 		$this->send($response);
@@ -117,13 +123,14 @@ abstract class Dispatch
 	 * Returns the default ServerError action. This is placed in a protected
 	 * method so that children can override this behavior as needed.
 	 *
+	 * @param Response $response
 	 * @return ServerError
 	 */
-	protected function serverErrorAction()
+	protected function serverErrorAction(Response $response, $params)
 	{
 		$this->debug('Using the default ServerError action.');
 
-		return new ServerError();
+		return new ServerError($response, $params);
 	}
 
 	/**
