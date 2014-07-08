@@ -95,13 +95,14 @@ abstract class Dispatch
 
 			$media = $request->accept->media->negotiate($available);
 			if (empty($media)) {
-				throw new Exception('No acceptable response formats found.');
+				$this->debug('Could not find a compatible content type for response.');
+				$response->content->setType('text/html');
+				$response->content->set($this->htmlErrorResponse());
+			} else {
+				$content = $this->presenter->run($data, $media->available->getValue(), $action->getView());
+				$response->content->set($content);
+				$response->content->setType($media->available->getValue());
 			}
-
-			$content = $this->presenter->run($data, $media->available->getValue(), $action->getView());
-
-			$response->content->set($content);
-			$response->content->setType($media->available->getValue());
 		}
 
 		$this->send($response);
@@ -123,6 +124,11 @@ abstract class Dispatch
 	 * @param Router $router
 	 */
 	abstract protected function defineRoutes(Router $router);
+
+	protected function htmlErrorResponse()
+	{
+		return 'Oops! Looks like something went wrong.';
+	}
 
 	/**
 	 * Returns the default ServerError action. This is placed in a protected
