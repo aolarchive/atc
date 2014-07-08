@@ -1,0 +1,22 @@
+{
+	"name": "aol/atc",
+	"description": "Air Traffic Control. Handles route dispatching using Aura components.",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "AOL",
+			"email": "amp@teamaol.com"
+		}
+	],
+	"minimum-stability": "dev",
+	"require": {
+		"aura/router": "2.*@dev",
+		"aura/web": "2.*@dev",
+		"psr/log": "~1.0"
+	},
+	"autoload": {
+		"psr-4": {
+			"Aol\\Atc\\": "src/"
+		}
+	}
+}
