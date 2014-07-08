@@ -91,12 +91,17 @@ abstract class Dispatch
 
 		// Make sure this is not a redirect and then run the response through the presenter.
 		if ($response->status->getCode() < 300 || $response->status->getCode() > 399) {
-			$available    = array_intersect($action->getAllowedFormats(), $this->presenter->getAvailableFormats());
-			$content_type = $request->accept->media->negotiate($available)->available->getValue();
-			$content      = $this->presenter->run($data, $content_type, $action->getView());
+			$available = array_intersect($action->getAllowedFormats(), $this->presenter->getAvailableFormats());
+
+			$media = $request->accept->media->negotiate($available);
+			if (empty($media)) {
+				throw new Exception('No acceptable response formats found.');
+			}
+
+			$content = $this->presenter->run($data, $media->available->getValue(), $action->getView());
 
 			$response->content->set($content);
-			$response->content->setType($content_type);
+			$response->content->setType($media->available->getValue());
 		}
 
 		$this->send($response);
