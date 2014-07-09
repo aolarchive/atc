@@ -14,10 +14,7 @@ class ActionFactory implements ActionFactoryInterface
 	}
 
 	/**
-	 * @param string  $action  Action name to be parsed.
-	 * @param Request $request The request object.
-	 * @param array   $params  An array of params from the router.
-	 * @return ActionInterface|null
+	 * @inheritdoc
 	 */
 	public function newInstance($action, Request $request, $params)
 	{

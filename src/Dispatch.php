@@ -2,7 +2,6 @@
 
 namespace Aol\Atc;
 
-use Aol\Atc\Action\ServerError;
 use Aol\Atc\Exceptions\ActionNotFoundException;
 use Aol\Atc\Exceptions\ExitDispatchException;
 use Aol\Atc\Exceptions\PageNotFoundException;
@@ -59,7 +58,7 @@ abstract class Dispatch
 			// Get the matched route.
 			$route = $this->router->match($request->url->get(PHP_URL_PATH), $request->server->get());
 			if (!$route) {
-				$this->routeNotMatched($request);
+				$this->errorRouteNotMatched($request);
 			}
 
 			$params = $route->params;
@@ -67,7 +66,7 @@ abstract class Dispatch
 			// Get the appropriate action.
 			$action = $this->action_factory->newInstance($params['action'], $request, $params);
 			if (!$action) {
-				$this->actionNotFound($params['action']);
+				$this->errorActionNotFound($params['action']);
 			}
 
 			// Run the response through the action.
@@ -83,7 +82,7 @@ abstract class Dispatch
 				$action = $e;
 			} // When all else fails get the default server error action.
 			else {
-				$action = $this->serverErrorAction($response, $params);
+				$action = $this->errorHtmlResponse($response, $params);
 			}
 
 			$data = $action($response);
@@ -97,7 +96,7 @@ abstract class Dispatch
 			if (empty($media)) {
 				$this->debug('Could not find a compatible content type for response.');
 				$response->content->setType('text/html');
-				$response->content->set($this->htmlErrorResponse());
+				$response->content->set($this->errorHtmlResponse());
 			} else {
 				$content = $this->presenter->run($data, $media->available->getValue(), $action->getView());
 				$response->content->set($content);
@@ -125,23 +124,9 @@ abstract class Dispatch
 	 */
 	abstract protected function defineRoutes(Router $router);
 
-	protected function htmlErrorResponse()
+	protected function errorHtmlResponse()
 	{
-		return 'Oops! Looks like something went wrong.';
-	}
-
-	/**
-	 * Returns the default ServerError action. This is placed in a protected
-	 * method so that children can override this behavior as needed.
-	 *
-	 * @param Response $response
-	 * @return ServerError
-	 */
-	protected function serverErrorAction(Response $response, $params)
-	{
-		$this->debug('Using the default ServerError action.');
-
-		return new ServerError($response, $params);
+		return '<html><head><title>Oops! Something went wrong.</title></head><body>Oops! Looks like something went wrong.</body></html>';
 	}
 
 	/**
@@ -152,7 +137,7 @@ abstract class Dispatch
 	 * @param string $action Action name
 	 * @throws Exceptions\ActionNotFoundException
 	 */
-	protected function actionNotFound($action)
+	protected function errorActionNotFound($action)
 	{
 		$this->debug('Action not found: ' . $action);
 		throw new ActionNotFoundException;
@@ -166,7 +151,7 @@ abstract class Dispatch
 	 * @param Request $request
 	 * @throws Exceptions\PageNotFoundException
 	 */
-	protected function routeNotMatched(Request $request)
+	protected function errorRouteNotMatched(Request $request)
 	{
 		$this->debug('No matching route: ' . $request->url->get());
 		throw new PageNotFoundException;
