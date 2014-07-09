@@ -88,20 +88,25 @@ abstract class Dispatch
 			$data = $action($response);
 		}
 
-		// Make sure this is not a redirect and then run the response through the presenter.
-		if ($response->status->getCode() < 300 || $response->status->getCode() > 399) {
-			$available = array_intersect($action->getAllowedFormats(), $this->presenter->getAvailableFormats());
+		try {
+			// Make sure this is not a redirect and then run the response through the presenter.
+			if ($response->status->getCode() < 300 || $response->status->getCode() > 399) {
+				$available = array_intersect($action->getAllowedFormats(), $this->presenter->getAvailableFormats());
 
-			$media = $request->accept->media->negotiate($available);
-			if (empty($media)) {
-				$this->debug('Could not find a compatible content type for response.');
-				$response->content->setType('text/html');
-				$response->content->set($this->errorHtmlResponse());
-			} else {
-				$content = $this->presenter->run($data, $media->available->getValue(), $action->getView());
-				$response->content->set($content);
-				$response->content->setType($media->available->getValue());
+				$media = $request->accept->media->negotiate($available);
+				if (empty($media)) {
+					throw new Exception('Cloud not find a compatible content type for response');
+				} else {
+					$content = $this->presenter->run($data, $media->available->getValue(), $action->getView());
+					$response->content->set($content);
+					$response->content->setType($media->available->getValue());
+				}
 			}
+		} catch (\Exception $e) {
+			$this->debug('Presentation Exception: ' . $e->getMessage());
+			$response->status->set(500);
+			$response->content->setType('text/html');
+			$response->content->set($this->errorHtmlResponse());
 		}
 
 		$this->send($response);

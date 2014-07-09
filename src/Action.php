@@ -42,4 +42,14 @@ abstract class Action implements ActionInterface
 	{
 		return $this->allowed_formats;
 	}
+
+	protected function getRequest()
+	{
+		return $this->request;
+	}
+
+	protected function getParams()
+	{
+		return $this->params;
+	}
 }
