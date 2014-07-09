@@ -124,6 +124,13 @@ abstract class Dispatch
 	 */
 	abstract protected function defineRoutes(Router $router);
 
+	/**
+	 * Returns a string to be sent to the browser in the event everything falls
+	 * to pieces. This is implemented in a protected method so that children
+	 * can override this behavior as needed.
+	 *
+	 * @return string
+	 */
 	protected function errorHtmlResponse()
 	{
 		return '<html><head><title>Oops! Something went wrong.</title></head><body>Oops! Looks like something went wrong.</body></html>';
