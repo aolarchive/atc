@@ -70,7 +70,7 @@ abstract class Dispatch
 			}
 
 			// Run the response through the action.
-			$data = $action($response);
+			$action($response);
 		} catch (\Exception $e) {
 			$this->debug('Caught ' . get_class($e) . ': ' . $e->getMessage());
 
@@ -85,7 +85,7 @@ abstract class Dispatch
 				$action = $this->errorHtmlResponse($response, $params);
 			}
 
-			$data = $action($response);
+			$action($response);
 		}
 
 		try {
@@ -97,9 +97,11 @@ abstract class Dispatch
 				if (empty($media)) {
 					throw new Exception('Cloud not find a compatible content type for response');
 				} else {
-					$content = $this->presenter->run($data, $media->available->getValue(), $action->getView());
+					$format  = $media->available->getValue();
+					$content = $this->presenter->run($action->getData($format), $format, $action->getView());
+
 					$response->content->set($content);
-					$response->content->setType($media->available->getValue());
+					$response->content->setType($format);
 				}
 			}
 		} catch (\Exception $e) {

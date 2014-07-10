@@ -7,8 +7,9 @@ use Aura\Web\Response;
 
 abstract class Action implements ActionInterface
 {
-	protected $view = '';
 	protected $allowed_formats = ['text/html', 'application/json'];
+	protected $data = [];
+	protected $view = '';
 
 	/** @var array URL params */
 	private $params = [];
@@ -41,6 +42,14 @@ abstract class Action implements ActionInterface
 	public function getAllowedFormats()
 	{
 		return $this->allowed_formats;
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function getData($format)
+	{
+		return $this->data;
 	}
 
 	protected function getRequest()
