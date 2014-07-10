@@ -18,8 +18,17 @@ class ActionFactory implements ActionFactoryInterface
 	 */
 	public function newInstance($action, Request $request, $params)
 	{
-		$class = $this->namespace . str_replace('.', '\\', $action);
+		$class = $this->parseAction($action);
 
 		return new $class($request, $params);
+	}
+
+	/**
+	 * @param string $action
+	 * @return string
+	 */
+	protected function parseAction($action)
+	{
+		return $this->namespace . str_replace('.', '\\', $action);
 	}
 }
