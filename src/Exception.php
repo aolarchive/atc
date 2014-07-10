@@ -6,6 +6,7 @@ use Aura\Web\Response;
 
 class Exception extends \Exception implements ActionInterface
 {
+	protected $data = [];
 	protected $http_code = 500;
 	protected $view = 'errors/500';
 
@@ -47,4 +48,8 @@ class Exception extends \Exception implements ActionInterface
 		return ['text/html', 'application/json'];
 	}
 
+	public function getData($format)
+	{
+		return $this->data;
+	}
 }
