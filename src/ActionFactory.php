@@ -6,7 +6,7 @@ use Aura\Web\Request;
 
 class ActionFactory implements ActionFactoryInterface
 {
-	private $namespace = '';
+	protected $namespace = '';
 
 	public function __construct($namespace)
 	{
@@ -19,6 +19,9 @@ class ActionFactory implements ActionFactoryInterface
 	public function newInstance($action, Request $request, $params)
 	{
 		$class = $this->parseAction($action);
+		if (!is_null($class)) {
+			$class = new $class($request, $params, $this->router);
+		}
 
 		return new $class($request, $params);
 	}
@@ -29,6 +32,9 @@ class ActionFactory implements ActionFactoryInterface
 	 */
 	protected function parseAction($action)
 	{
-		return $this->namespace . str_replace('.', '\\', $action);
+		$class = $this->namespace . str_replace('.', '\\', $action);
+		$class = class_exists($class) ? $class : null;
+
+		return $class;
 	}
 }
