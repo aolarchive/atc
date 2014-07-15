@@ -20,7 +20,7 @@ class ActionFactory implements ActionFactoryInterface
 	{
 		$class = $this->parseAction($action);
 		if (!is_null($class)) {
-			$class = new $class($request, $params, $this->router);
+			$class = new $class($request, $params);
 		}
 
 		return new $class($request, $params);
