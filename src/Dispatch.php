@@ -11,7 +11,7 @@ use Aura\Web\Response;
 use Aura\Web\WebFactory;
 use Psr\Log\LoggerInterface;
 
-abstract class Dispatch
+class Dispatch
 {
 	/** @var \Aol\Atc\ActionFactoryInterface */
 	private $action_factory;
@@ -43,8 +43,6 @@ abstract class Dispatch
 		$this->action_factory = $action_factory;
 		$this->presenter      = $presenter;
 		$this->logger         = $logger;
-
-		$this->defineRoutes($this->router);
 	}
 
 	public function run()
@@ -123,13 +121,6 @@ abstract class Dispatch
 	{
 		$this->debug_enabled = false;
 	}
-
-	/**
-	 * Allows child instances to define routes.
-	 *
-	 * @param Router $router
-	 */
-	abstract protected function defineRoutes(Router $router);
 
 	/**
 	 * Returns a string to be sent to the browser in the event everything falls
