@@ -19,5 +19,13 @@
 			"Aol\\Atc\\": "src/",
 			"Aol\\AtcExample\\": "example/"
 		}
+	},
+	"extra": {
+		"aura": {
+			"type": "library",
+			"config": {
+				"common": "Aol\\Atc\\Config"
+			}
+		}
 	}
 }
