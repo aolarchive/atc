@@ -78,9 +78,9 @@ class Dispatch
 			} // Exceptions can implement the action interface to handle themselves.
 			elseif ($e instanceof ActionInterface) {
 				$action = $e;
-			} // When all else fails get the default server error action.
+			} // When all else fails use the default ATC exception.
 			else {
-				$action = $this->errorHtmlResponse($response, $params);
+				$action = new Exception();
 			}
 
 			$action($response);
