@@ -7,7 +7,7 @@ use Aura\Web\Response;
 
 abstract class Action implements ActionInterface
 {
-	protected $allowed_formats = ['text/html', 'application/json'];
+	protected $allowed_formats = ['text/html', 'application/json', 'image/png'];
 	protected $data = [];
 	protected $view = '';
 

@@ -22,7 +22,7 @@ class Presenter implements PresenterInterface
 
 	public function getAvailableFormats()
 	{
-		return ['text/html', 'application/json'];
+		return ['text/html', 'application/json', 'image/png'];
 	}
 
 	/**
@@ -33,6 +33,10 @@ class Presenter implements PresenterInterface
 		switch ($format) {
 			case 'application/json':
 				$data = json_encode($data);
+				break;
+
+			case 'image/png':
+				// the image data doesn't need to be changed;
 				break;
 
 			case 'text/html':
