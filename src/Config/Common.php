@@ -1,8 +1,8 @@
 <?php
 
-namespace Aol\Atc;
+namespace Aol\Atc\Config;
 
-use Aura\Di\Container\Config;
+use Aura\Di\Container;
 
 class Common extends \Aura\Di\Config
 {
