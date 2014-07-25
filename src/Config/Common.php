@@ -2,9 +2,9 @@
 
 namespace Aol\Atc;
 
-use Aura\Di\Container;
+use Aura\Di\Container\Config;
 
-class Config extends \Aura\Di\Config
+class Common extends \Aura\Di\Config
 {
 	public function define(Container $di)
 	{

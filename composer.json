@@ -24,7 +24,7 @@
 		"aura": {
 			"type": "library",
 			"config": {
-				"common": "Aol\\Atc\\Config"
+				"common": "Aol\\Atc\\Config\\Common"
 			}
 		}
 	}
