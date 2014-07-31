@@ -52,4 +52,12 @@ class Exception extends \Exception implements ActionInterface
 	{
 		return $this->data;
 	}
+
+	public function after()
+	{
+	}
+
+	public function before()
+	{
+	}
 }
