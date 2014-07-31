@@ -15,6 +15,16 @@ interface ActionInterface
 	public function __invoke(Response $response);
 
 	/**
+	 * This method is expected to be run after the action is invoked.
+	 */
+	public function after();
+
+	/**
+	 * This method is expected to be run before the action is invoked.
+	 */
+	public function before();
+
+	/**
 	 * Returns the allowed response formats. Will be used by the
 	 * dispatcher to determine the correct response format.
 	 *

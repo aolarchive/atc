@@ -68,7 +68,9 @@ class Dispatch
 			}
 
 			// Run the response through the action.
+			$action->before();
 			$action($response);
+			$action->after();
 		} catch (\Exception $e) {
 			$this->debug('Caught ' . get_class($e) . ': ' . $e->getMessage());
 
@@ -93,7 +95,7 @@ class Dispatch
 
 				$media = $request->accept->media->negotiate($available);
 				if (empty($media)) {
-					throw new Exception('Cloud not find a compatible content type for response');
+					throw new Exception('Could not find a compatible content type for response');
 				} else {
 					$format  = $media->available->getValue();
 					$content = $this->presenter->run($action->getData($format), $format, $action->getView());
@@ -103,7 +105,7 @@ class Dispatch
 				}
 			}
 		} catch (\Exception $e) {
-			$this->debug('Presentation Exception: ' . $e->getMessage());
+			$this->debug('Presentation Exception - ' . get_class($e) . ': ' . $e->getMessage());
 			$response->status->set(500);
 			$response->content->setType('text/html');
 			$response->content->set($this->errorHtmlResponse());

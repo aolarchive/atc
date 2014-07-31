@@ -29,6 +29,21 @@ abstract class Action implements ActionInterface
 	abstract public function __invoke(Response $response);
 
 	/**
+	 * This method is expected to be run after the action is invoked.
+	 */
+	public function after()
+	{
+	}
+
+	/**
+	 * This method is expected to be run before the action is invoked.
+	 */
+	public function before()
+	{
+	}
+
+
+	/**
 	 * @inheritdoc
 	 */
 	public function getView()
