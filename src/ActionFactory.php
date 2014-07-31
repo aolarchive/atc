@@ -23,7 +23,7 @@ class ActionFactory implements ActionFactoryInterface
 			$class = new $class($request, $params);
 		}
 
-		return new $class($request, $params);
+		return $class;
 	}
 
 	/**
