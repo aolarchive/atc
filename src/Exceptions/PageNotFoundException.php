@@ -8,4 +8,6 @@ class PageNotFoundException extends Exception
 {
 	protected $http_code = 404;
 	protected $view = 'errors/404';
+	protected $data = ['status' => 'failure', 'message' => 'page not found'];
+
 }

@@ -6,7 +6,7 @@ use Aura\Web\Response;
 
 class Exception extends \Exception implements ActionInterface
 {
-	protected $data = [];
+	protected $data = ['status' => 'failure', 'message' => 'system error'];
 	protected $http_code = 500;
 	protected $view = 'errors/500';
 
