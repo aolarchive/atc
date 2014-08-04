@@ -72,7 +72,7 @@ class Dispatch
 			$action($response);
 			$action->after();
 		} catch (\Exception $e) {
-			$this->debug('Caught ' . get_class($e) . ': ' . $e->getMessage());
+			$this->debug('Caught 500: ' . get_class($e) . ': ' . $e->getMessage() . PHP_EOL . $e->getTraceAsString());
 
 			// This is your escape hatch.
 			if ($e instanceof ExitDispatchException) {

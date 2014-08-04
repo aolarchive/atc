@@ -1,6 +1,6 @@
 <?php
 
-namespace Amp\Atc\Exceptions;
+namespace Aol\Atc\Exceptions;
 
 use Aol\Atc\Exception;
 
