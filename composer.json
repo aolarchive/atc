@@ -11,8 +11,9 @@
 	"minimum-stability": "dev",
 	"require": {
 		"aura/router": "~2.0",
-		"aura/web": "2.*@dev",
-		"psr/log": "~1.0"
+		"aura/web": "~2.0",
+		"psr/log": "~1.0",
+		"aura/accept": "dev-master"
 	},
 	"autoload": {
 		"psr-4": {

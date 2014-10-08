@@ -5,6 +5,7 @@ namespace Aol\Atc;
 use Aol\Atc\Exceptions\ActionNotFoundException;
 use Aol\Atc\Exceptions\ExitDispatchException;
 use Aol\Atc\Exceptions\PageNotFoundException;
+use Aura\Accept\AcceptFactory;
 use Aura\Router\Router;
 use Aura\Web\Request;
 use Aura\Web\Response;
@@ -93,11 +94,15 @@ class Dispatch
 			if ($response->status->getCode() < 300 || $response->status->getCode() > 399) {
 				$available = array_intersect($action->getAllowedFormats(), $this->presenter->getAvailableFormats());
 
-				$media = $request->accept->media->negotiate($available);
+				//@todo don't mix Di and randomly calling factories
+				$accept_factory = new AcceptFactory($_SERVER);
+				$accept         = $accept_factory->newInstance();
+
+				$media = $accept->negotiateMedia($available);
 				if (empty($media)) {
 					throw new Exception('Could not find a compatible content type for response');
 				} else {
-					$format  = $media->available->getValue();
+					$format  = $media->getValue();
 					$content = $this->presenter->run($action->getData($format), $format, $action->getView());
 
 					$response->content->set($content);
