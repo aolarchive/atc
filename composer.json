@@ -9,11 +9,12 @@
 		}
 	],
 	"minimum-stability": "dev",
+    "prefer-stable": true,
 	"require": {
 		"aura/router": "~2.0",
 		"aura/web": "~2.0",
 		"psr/log": "~1.0",
-		"aura/accept": "dev-master"
+		"aura/accept": "~2.0"
 	},
 	"autoload": {
 		"psr-4": {
