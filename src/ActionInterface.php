@@ -2,7 +2,8 @@
 
 namespace Aol\Atc;
 
-use Aura\Web\Response;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 interface ActionInterface
 {
@@ -10,19 +11,26 @@ interface ActionInterface
 	 * Takes a response object and returns an array of data. Formatting will be
 	 * handled by a Presenter.
 	 *
-	 * @param Response $response
+	 * @param Request $request
+	 * @return Response|void
 	 */
-	public function __invoke(Response $response);
+	public function __invoke(Request $request);
 
 	/**
 	 * This method is expected to be run after the action is invoked.
+	 *
+	 * @param Request  $request
+	 * @param Response $response
+	 * @return Response
 	 */
-	public function after();
+	public function after(Request $request, Response $response = null);
 
 	/**
 	 * This method is expected to be run before the action is invoked.
+	 *
+	 * @param Request $request
 	 */
-	public function before();
+	public function before(Request $request);
 
 	/**
 	 * Returns the allowed response formats. Will be used by the
@@ -35,16 +43,16 @@ interface ActionInterface
 	public function getAllowedFormats();
 
 	/**
-	 * Returns the unformatted action data to be included in the response. The
-	 * response format is required so that any further data pre-processing can
-	 * happen before being sent to the presentation layer. For example, HTML
-	 * responses may need to include specific template variables that would not
-	 * be relevant in a JSON response.
+	 * Returns the unformatted action data to be included in the response.
 	 *
-	 * @param string $format
 	 * @return array
 	 */
-	public function getData($format);
+	public function getData();
+
+	/**
+	 * @return int
+	 */
+	public function getHttpCode();
 
 	/**
 	 * Returns the view name.

@@ -2,7 +2,7 @@
 
 namespace Aol\Atc;
 
-use Aura\Web\Response;
+use Symfony\Component\HttpFoundation\Response;
 
 interface PresenterInterface
 {
@@ -10,7 +10,7 @@ interface PresenterInterface
 	 * @param array  $data
 	 * @param string $format
 	 * @param string $view
-	 * @return string
+	 * @return Response
 	 */
 	public function run($data, $format, $view = null);
 

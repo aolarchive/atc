@@ -2,7 +2,8 @@
 
 namespace Aol\Atc;
 
-use Aura\Web\Response;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class Exception extends \Exception implements ActionInterface
 {
@@ -15,14 +16,12 @@ class Exception extends \Exception implements ActionInterface
 	 * data is expected to be assigned to the response content as an array.
 	 * Formatting will be handled by a separate process.
 	 *
-	 * @param Response $response
-	 * @return array
+	 * @param Request $request
+	 * @return Response
 	 */
-	public function __invoke(Response $response)
+	public function __invoke(Request $request)
 	{
-		$response->status->setCode($this->http_code);
-
-		return [];
+		$this->data['message'] = $this->getMessage();
 	}
 
 	/**
@@ -48,16 +47,36 @@ class Exception extends \Exception implements ActionInterface
 		return ['text/html', 'application/json'];
 	}
 
-	public function getData($format)
+	/**
+	 * Returns the unformatted action data to be included in the response.
+	 *
+	 * @return array
+	 */
+	public function getData()
 	{
 		return $this->data;
 	}
 
-	public function after()
+	/**
+	 * @return int
+	 */
+	public function getHttpCode()
+	{
+		return $this->http_code;
+	}
+
+
+	/**
+	 * @inheritdoc
+	 */
+	public function after(Request $request, Response $response = null)
 	{
 	}
 
-	public function before()
+	/**
+	 * @inheritdoc
+	 */
+	public function before(Request $request)
 	{
 	}
 }

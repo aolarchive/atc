@@ -2,44 +2,62 @@
 
 namespace Aol\Atc;
 
-use Aura\Web\Request;
-use Aura\Web\Response;
+
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 abstract class Action implements ActionInterface
 {
 	protected $allowed_formats = ['text/html', 'application/json', 'image/png'];
 	protected $data = [];
+	protected $http_code = 200;
 	protected $view = '';
 
 	/** @var array URL params */
-	private $params = [];
+	protected $params = [];
 
-	/** @var Request Request object */
-	private $request;
-
-	public function __construct(Request $request, array $params)
+	public function __construct(array $params)
 	{
-		$this->request = $request;
 		$this->params  = $params;
 	}
 
 	/**
-	 * @inheritdoc
+	 * Takes a response object and returns an array of data. Formatting will be
+	 * handled by a Presenter.
+	 *
+	 * @param Request $request
+	 * @return Response|void
 	 */
-	abstract public function __invoke(Response $response);
+	abstract public function __invoke(Request $request);
 
 	/**
 	 * This method is expected to be run after the action is invoked.
+	 *
+	 * @param Request  $request
+	 * @param Response $response
+	 * @return Response
 	 */
-	public function after()
+	public function after(Request $request, Response $response = null)
 	{
+		return $response;
 	}
 
 	/**
 	 * This method is expected to be run before the action is invoked.
+	 *
+	 * @param Request $request
 	 */
-	public function before()
+	public function before(Request $request)
 	{
+		// TODO: Implement before() method.
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getHttpCode()
+	{
+		return $this->http_code;
 	}
 
 
@@ -62,18 +80,8 @@ abstract class Action implements ActionInterface
 	/**
 	 * @inheritdoc
 	 */
-	public function getData($format)
+	public function getData()
 	{
 		return $this->data;
-	}
-
-	protected function getRequest()
-	{
-		return $this->request;
-	}
-
-	protected function getParams()
-	{
-		return $this->params;
 	}
 }

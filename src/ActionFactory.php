@@ -2,8 +2,6 @@
 
 namespace Aol\Atc;
 
-use Aura\Web\Request;
-
 class ActionFactory implements ActionFactoryInterface
 {
 	protected $namespace = '';
@@ -16,11 +14,11 @@ class ActionFactory implements ActionFactoryInterface
 	/**
 	 * @inheritdoc
 	 */
-	public function newInstance($action, Request $request, $params)
+	public function newInstance($action, $params)
 	{
 		$class = $this->parseAction($action);
 		if (!is_null($class)) {
-			$class = new $class($request, $params);
+			$class = new $class($params);
 		}
 
 		return $class;

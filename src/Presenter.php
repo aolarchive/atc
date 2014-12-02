@@ -2,7 +2,9 @@
 
 namespace Aol\Atc;
 
-use Aura\Web\Response;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class Presenter implements PresenterInterface
 {
@@ -32,11 +34,13 @@ class Presenter implements PresenterInterface
 	{
 		switch ($format) {
 			case 'application/json':
-				$data = json_encode($data);
+				$response = new JsonResponse($data);
 				break;
 
+			case 'image/gif':
+			case 'image/jpeg':
 			case 'image/png':
-				// the image data doesn't need to be changed;
+				$response = new BinaryFileResponse($data);
 				break;
 
 			case 'text/html':
@@ -48,9 +52,9 @@ class Presenter implements PresenterInterface
 
 				ob_start();
 				require $file;
-				$data = ob_get_clean();
+				$response = new Response(ob_get_clean());
 		}
 
-		return $data;
+		return $response;
 	}
 }
