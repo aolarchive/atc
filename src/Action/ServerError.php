@@ -3,7 +3,8 @@
 namespace Aol\Atc\Action;
 
 use Aol\Atc\Action;
-use Aura\Web\Response;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class ServerError extends Action
 {
@@ -12,10 +13,10 @@ class ServerError extends Action
 	/**
 	 * @inheritdoc
 	 */
-	public function __invoke(Response $response)
+	public function __invoke(Request $request)
 	{
-		$response->status->setCode(500);
-
+		$response = new Response();
+		$response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
 		return $response;
 	}
 }

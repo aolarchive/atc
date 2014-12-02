@@ -15,7 +15,9 @@ interface PresenterInterface
 	public function run($data, $format, $view = null);
 
 	/**
-	 * @return array
+	 * Returns an array of media types that the presenter supports
+	 *
+	 * @return string[]
 	 */
 	public function getAvailableFormats();
 }

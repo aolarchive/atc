@@ -22,6 +22,9 @@ class Presenter implements PresenterInterface
 		$this->view_dir = $view_dir;
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function getAvailableFormats()
 	{
 		return ['text/html', 'application/json', 'image/png'];
