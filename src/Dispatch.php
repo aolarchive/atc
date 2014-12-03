@@ -73,7 +73,6 @@ class Dispatch
 		// --------------- Present
 		if (!($response instanceof Response)) {
 			try {
-//				echo $this->getMedia($action);
 				$response = $this->presenter->run(
 					$action->getData(),
 					$this->getMedia($action)->getValue(),
@@ -122,7 +121,7 @@ class Dispatch
 	protected function matchRoute()
 	{
 		$this->matched_route = $this->router->match(
-			$this->request->getRequestUri(),
+			$this->request->getPathInfo(),
 			$this->request->server->all()
 		);
 
@@ -157,7 +156,6 @@ class Dispatch
 		//@todo don't mix Di and randomly calling factories
 		$accept_factory = new AcceptFactory($_SERVER);
 		$accept         = $accept_factory->newInstance();
-
 		$media = $accept->negotiateMedia($available);
 		if (empty($media)) {
 			throw new Exception('Could not find a compatible content type for response');
@@ -179,7 +177,7 @@ class Dispatch
 		// Get the matched route.
 		$route = $this->matched_route ?: $this->matchRoute();
 		if (!$route) {
-			$this->errorRouteNotMatched($request);
+			return $this->errorRouteNotMatched($request);
 		}
 
 		$params = $route->params;
@@ -187,7 +185,7 @@ class Dispatch
 		// Get the appropriate action.
 		$action = $this->action_factory->newInstance($params['action'], $params);
 		if (!$action) {
-			$this->errorActionNotFound($params['action']);
+			return $this->errorActionNotFound($params['action']);
 		}
 
 		return $action;
@@ -200,6 +198,7 @@ class Dispatch
 	 *
 	 * @param string $action Action name
 	 * @throws Exceptions\ActionNotFoundException
+	 * @return null
 	 */
 	protected function errorActionNotFound($action)
 	{
@@ -225,6 +224,7 @@ class Dispatch
 	 *
 	 * @param Request $request
 	 * @throws Exceptions\PageNotFoundException
+	 * @return null
 	 */
 	protected function errorRouteNotMatched(Request $request)
 	{
