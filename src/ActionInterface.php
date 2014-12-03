@@ -3,7 +3,6 @@
 namespace Aol\Atc;
 
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 interface ActionInterface
 {
@@ -12,7 +11,7 @@ interface ActionInterface
 	 * handled by a Presenter.
 	 *
 	 * @param Request $request
-	 * @return Response|void
+	 * @return mixed
 	 */
 	public function __invoke(Request $request);
 
@@ -25,13 +24,6 @@ interface ActionInterface
 	 * @return array
 	 */
 	public function getAllowedFormats();
-
-	/**
-	 * Returns the unformatted action data to be included in the response.
-	 *
-	 * @return array
-	 */
-	public function getData();
 
 	/**
 	 * @return int

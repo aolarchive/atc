@@ -9,6 +9,7 @@
         <whitelist>
             <directory suffix=".php">./src</directory>
             <exclude><directory>./src/Config</directory></exclude>
+            <exclude><directory>./src/Events</directory></exclude>
         </whitelist>
     </filter>
     <logging>

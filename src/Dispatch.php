@@ -2,6 +2,7 @@
 
 namespace Aol\Atc;
 
+use Aol\Atc\EventHandlers\EventHandlerInterface;
 use Aol\Atc\Events\DispatchErrorEvent;
 use Aol\Atc\Events\PostDispatchEvent;
 use Aol\Atc\Events\PostPresentEvent;
@@ -44,25 +45,32 @@ class Dispatch
 	/** @var EventDispatcherInterface */
 	private $events;
 
+	/** @var ActionInterface */
+	private $action;
+
 	/**
 	 * @param Router $router
 	 * @param Request $request
 	 * @param ActionFactoryInterface $action_factory
 	 * @param PresenterInterface $presenter
 	 * @param EventDispatcherInterface $event_dispatcher
+	 * @param EventHandlerInterface $exception_handler
 	 */
 	public function __construct(
 		Router $router,
 		Request $request,
 		ActionFactoryInterface $action_factory,
 		PresenterInterface $presenter,
-		EventDispatcherInterface $event_dispatcher
+		EventDispatcherInterface $event_dispatcher,
+		EventHandlerInterface $exception_handler
 	) {
 		$this->router           = $router;
 		$this->request          = $request;
 		$this->action_factory   = $action_factory;
 		$this->presenter        = $presenter;
 		$this->events = $event_dispatcher;
+
+		$this->events->addListener(DispatchEvents::DISPATCH_ERROR, $exception_handler, DispatchEvents::LATE_EVENT);
 	}
 
 	/**
@@ -73,17 +81,12 @@ class Dispatch
 	public function run()
 	{
 		// --------------- Dispatch
-		$action = $this->getAction($this->request);
-		$response = $this->dispatch($action, $this->request);
-
-		// If action returns nothing, try to extract data that may have been set on its internal data storage
-		if (is_null($response)) {
-			$response = $action->getData();
-		}
+		$this->action = $this->getAction($this->request);
+		$response = $this->dispatch($this->request);
 
 		// --------------- Present
 		if (!($response instanceof Response)) {
-			$response = $this->present($action, $response);
+			$response = $this->present($response);
 		}
 
 		// --------------- Return
@@ -91,48 +94,48 @@ class Dispatch
 	}
 
 	/**
-	 * @param ActionInterface $action
 	 * @param Request 		  $request
 	 * @param bool 			  $dispatch
 	 * @throws ExitDispatchException
 	 * @throws \Exception
 	 * @return mixed
 	 */
-	protected function dispatch(ActionInterface $action, Request $request, $dispatch = true)
+	protected function dispatch(Request $request, $dispatch = true)
 	{
 		$response = null;
+		$action  = $this->action;
 		$dispatch && $this->events->dispatch(DispatchEvents::PRE_DISPATCH, new PreDispatchEvent($this->request, $action));
 		try {
 			$response = $action($request);
 		} catch (ActionInterface $exc) { // Re-dispatch if the exception implements ActionInterface (http://i.imgur.com/QKIfg.gif)
-			$response = $this->dispatch($exc, $request, false);	// Re-Dispatch without events
+			$this->action = $exc;
+			$response = $this->dispatch($request, false);	// Re-Dispatch without events
 		} catch (\Exception $exc) {
 			$dispatch && $this->events->dispatch(DispatchEvents::DISPATCH_ERROR, new DispatchErrorEvent($exc, $request));
-			throw $exc;
 		}
 		$dispatch && $this->events->dispatch(DispatchEvents::POST_DISPATCH, new PostDispatchEvent($this->request, $action, $response));
 		return $response;
 	}
 
 	/**
-	 * @param ActionInterface $action
 	 * @param $data
+	 * @throws Exception
+	 * @throws \Exception
 	 * @return Response
 	 */
-	protected function present(ActionInterface $action, $data)
+	protected function present($data)
 	{
-		$media_type = $this->getMedia($action)->getValue();
+		$media_type = $this->getMedia($this->action)->getValue();
 
-		$this->events->dispatch(DispatchEvents::PRE_PRESENT, new PrePresentEvent($this->request, $action));
+		$this->events->dispatch(DispatchEvents::PRE_PRESENT, new PrePresentEvent($this->request, $this->action));
 		try {
-			$response = $this->presenter->run($data, $media_type, $action->getView());
-			$response->setStatusCode($action->getHttpCode());
+			$response = $this->presenter->run($data, $media_type, $this->action->getView());
+			$response->setStatusCode($this->action->getHttpCode());
 		} catch (\Exception $exc) {
-			$this->events->dispatch(DispatchEvents::DISPATCH_ERROR, new DispatchErrorEvent($exc, $this->request));
-			$content = $this->debug_enabled ? $exc->getMessage() : $this->getErrorHtmlResponse();
-			$response = new Response($content, Response::HTTP_INTERNAL_SERVER_ERROR, ['Content-Type' => 'text/html']);
+			$this->events->dispatch(DispatchEvents::DISPATCH_ERROR, new DispatchErrorEvent($exc, $this->request, $this->debug_enabled));
+			throw $exc;
 		}
-		$this->events->dispatch(DispatchEvents::POST_PRESENT, new PostPresentEvent($this->request, $response, $action));
+		$this->events->dispatch(DispatchEvents::POST_PRESENT, new PostPresentEvent($this->request, $response, $this->action));
 
 		return $response;
 	}
@@ -151,11 +154,17 @@ class Dispatch
 		return (bool)$this->matched_route;
 	}
 
+	/**
+	 * Toggle debugging on
+	 */
 	public function enableDebug()
 	{
 		$this->debug_enabled = true;
 	}
 
+	/**
+	 * Toggle debugging off
+	 */
 	public function disableDebug()
 	{
 		$this->debug_enabled = false;
@@ -213,7 +222,7 @@ class Dispatch
 		if (!$route) {
 			$exc = new PageNotFoundException();
 			$this->events->dispatch(DispatchEvents::DISPATCH_ERROR, new DispatchErrorEvent($exc, $request));
-			throw $exc;
+			return $exc;
 		}
 
 		$params = $route->params;
@@ -223,21 +232,9 @@ class Dispatch
 		if (!$action) {
 			$exc = new ActionNotFoundException();
 			$this->events->dispatch(DispatchEvents::DISPATCH_ERROR, new DispatchErrorEvent($exc, $request));
-			throw $exc;
+			return $exc;
 		}
 
 		return $action;
-	}
-
-	/**
-	 * Returns a string to be sent to the browser in the event everything falls
-	 * to pieces. This is implemented in a protected method so that children
-	 * can override this behavior as needed.
-	 *
-	 * @return string
-	 */
-	protected function getErrorHtmlResponse()
-	{
-		return '<html><head><title>Oops! Something went wrong.</title></head><body>Oops! Looks like something went wrong.</body></html>';
 	}
 }

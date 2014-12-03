@@ -23,6 +23,11 @@ class DispatchErrorEvent extends Event
 	private $exception;
 
 	/**
+	 * @var bool
+	 */
+	private $debug;
+
+	/**
 	 * @return \Exception
 	 */
 	public function getException()
@@ -39,12 +44,22 @@ class DispatchErrorEvent extends Event
 	}
 
 	/**
+	 * @return boolean
+	 */
+	public function isDebug()
+	{
+		return $this->debug;
+	}
+
+	/**
 	 * @param \Exception $exception
 	 * @param Request $request
+	 * @param bool $debug
 	 */
-	function __construct(\Exception $exception, Request $request)
+	function __construct(\Exception $exception, Request $request, $debug = false)
 	{
 		$this->exception = $exception;
 		$this->request = $request;
+		$this->debug = $debug;
 	}
 }

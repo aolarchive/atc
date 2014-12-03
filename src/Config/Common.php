@@ -16,12 +16,16 @@ class Common extends \Aura\Di\Config
 		$di->set('Aol\\Atc\\Presenter', $di->lazyNew('Aol\\Atc\\Presenter'));
 		$di->set('Aol\\Atc\\PresenterInterface', $di->lazyGet('Aol\\Atc\\Presenter'));
 
+		$di->set('Aol\\Atc\\EventDispatcher', $di->lazyNew('Aol\\Atc\\EventDispatcher'));
+		$di->set('Aol\\Atc\\EventHandlers\\DispatchErrorHandler', $di->lazyNew('Aol\\Atc\\EventHandlers\\DispatchErrorHandler'));
+
 		$di->params['Aol\\Atc\\Dispatch'] = [
-			'router'         => $di->lazyGet('Aura\\Router\\Router'),
-			'web_factory'    => $di->lazyGet('Aura\\Web\\WebFactory'),
-			'action_factory' => $di->lazyGet('Aol\\Atc\\ActionFactoryInterface'),
-			'presenter'      => $di->lazyGet('Aol\\Atc\\PresenterInterface'),
-			'logger'         => $di->lazyGet('Psr\\Log\\LoggerInterface')
+			'router'            => $di->lazyGet('Aura\\Router\\Router'),
+			'web_factory'       => $di->lazyGet('Aura\\Web\\WebFactory'),
+			'action_factory'    => $di->lazyGet('Aol\\Atc\\ActionFactoryInterface'),
+			'presenter'         => $di->lazyGet('Aol\\Atc\\PresenterInterface'),
+			'event_dispatcher'  => $di->lazyGet('Aol\\Atc\\EventDispatcher'),
+			'exception_handler' => $di->lazyGet('Aol\\Atc\\EventHandlers\\DispatchErrorHandler')
 		];
 	}
 }

@@ -8,17 +8,24 @@ use Symfony\Component\HttpFoundation\Response;
 
 abstract class Action implements ActionInterface
 {
+	/** @var array  */
 	protected $allowed_formats = ['text/html', 'application/json', 'image/png'];
-	protected $data = [];
+
+	/** @var int  */
 	protected $http_code = 200;
+
+	/** @var string  */
 	protected $view = '';
 
 	/** @var array URL params */
 	protected $params = [];
 
+	/**
+	 * @param array $params
+	 */
 	public function __construct(array $params)
 	{
-		$this->params  = $params;
+		$this->params = $params;
 	}
 
 	/**
@@ -38,7 +45,6 @@ abstract class Action implements ActionInterface
 		return $this->http_code;
 	}
 
-
 	/**
 	 * @inheritdoc
 	 */
@@ -53,13 +59,5 @@ abstract class Action implements ActionInterface
 	public function getAllowedFormats()
 	{
 		return $this->allowed_formats;
-	}
-
-	/**
-	 * @inheritdoc
-	 */
-	public function getData()
-	{
-		return $this->data;
 	}
 }
