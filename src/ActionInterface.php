@@ -17,22 +17,6 @@ interface ActionInterface
 	public function __invoke(Request $request);
 
 	/**
-	 * This method is expected to be run after the action is invoked.
-	 *
-	 * @param Request  $request
-	 * @param Response $response
-	 * @return Response
-	 */
-	public function after(Request $request, Response $response = null);
-
-	/**
-	 * This method is expected to be run before the action is invoked.
-	 *
-	 * @param Request $request
-	 */
-	public function before(Request $request);
-
-	/**
 	 * Returns the allowed response formats. Will be used by the
 	 * dispatcher to determine the correct response format.
 	 *

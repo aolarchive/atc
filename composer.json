@@ -13,11 +13,13 @@
     "aura/accept": "~2.0",
     "aura/router": "~2.0",
     "psr/log": "~1.0",
-    "symfony/http-foundation": "~2.5"
+    "symfony/http-foundation": "~2.5",
+    "symfony/event-dispatcher": "~2.6"
   },
   "require-dev": {
     "phpunit/phpunit": "~4.3",
-    "mockery/mockery": "~0.9"
+    "mockery/mockery": "~0.9",
+    "aura/di": "~2.0"
   },
   "autoload": {
     "psr-4": {
