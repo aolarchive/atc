@@ -71,6 +71,7 @@ class Exception extends \Exception implements ActionInterface
 	 */
 	public function after(Request $request, Response $response = null)
 	{
+		return $response;
 	}
 
 	/**
