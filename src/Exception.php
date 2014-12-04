@@ -64,20 +64,4 @@ class Exception extends \Exception implements ActionInterface
 	{
 		return $this->http_code;
 	}
-
-
-	/**
-	 * @inheritdoc
-	 */
-	public function after(Request $request, Response $response = null)
-	{
-		return $response;
-	}
-
-	/**
-	 * @inheritdoc
-	 */
-	public function before(Request $request)
-	{
-	}
 }

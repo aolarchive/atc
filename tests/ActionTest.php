@@ -45,11 +45,6 @@ class ActionTest extends \PHPUnit_Framework_TestCase
 		$this->assertContainsOnly('string', $this->action->getAllowedFormats());
 	}
 
-	public function testGetData()
-	{
-		$this->assertEquals([], $this->action->getData());
-	}
-
 	public function setUp()
 	{
 		$this->request = new Request(['message' => "I'm a chunky monkey from funky town"]);

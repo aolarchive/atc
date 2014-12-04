@@ -2,14 +2,26 @@
 
 namespace Aol\Atc;
 
+use Aol\Atc\EventHandlers\EventHandlerInterface;
+use Aol\Atc\Events\DispatchErrorEvent;
+use Aol\Atc\Events\PostDispatchEvent;
+use Aol\Atc\Events\PostPresentEvent;
+use Aol\Atc\Events\PreDispatchEvent;
+use Aol\Atc\Events\PrePresentEvent;
 use Aol\Atc\Exceptions\ActionNotFoundException;
 use Aol\Atc\Exceptions\ExitDispatchException;
 use Aol\Atc\Exceptions\PageNotFoundException;
 use Aura\Accept\AcceptFactory;
 use Aura\Router\Router;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Class Dispatch
+ *
+ * @package Aol\Atc
+ */
 class Dispatch
 {
 	/** @var \Aol\Atc\ActionFactoryInterface */
@@ -30,22 +42,35 @@ class Dispatch
 	/** @var \Aura\Router\Route */
 	private $matched_route;
 
+	/** @var EventDispatcherInterface */
+	private $events;
+
+	/** @var ActionInterface */
+	private $action;
+
 	/**
-	 * @param Router                 $router
-	 * @param Request                $request
+	 * @param Router $router
+	 * @param Request $request
 	 * @param ActionFactoryInterface $action_factory
-	 * @param PresenterInterface     $presenter
+	 * @param PresenterInterface $presenter
+	 * @param EventDispatcherInterface $event_dispatcher
+	 * @param EventHandlerInterface $exception_handler
 	 */
 	public function __construct(
 		Router $router,
 		Request $request,
 		ActionFactoryInterface $action_factory,
-		PresenterInterface $presenter
+		PresenterInterface $presenter,
+		EventDispatcherInterface $event_dispatcher,
+		EventHandlerInterface $exception_handler
 	) {
-		$this->router         = $router;
-		$this->request        = $request;
-		$this->action_factory = $action_factory;
-		$this->presenter      = $presenter;
+		$this->router           = $router;
+		$this->request          = $request;
+		$this->action_factory   = $action_factory;
+		$this->presenter        = $presenter;
+		$this->events = $event_dispatcher;
+
+		$this->events->addListener(DispatchEvents::DISPATCH_ERROR, $exception_handler, DispatchEvents::LATE_EVENT);
 	}
 
 	/**
@@ -56,36 +81,65 @@ class Dispatch
 	public function run()
 	{
 		// --------------- Dispatch
-		try {
-			$action   = $this->getAction($this->request);
-			$response = $this->dispatch($action);
-		} catch (\Exception $e) {
-			// This is your escape hatch.
-			if ($e instanceof ExitDispatchException) {
-				throw $e;
-			}
-
-			// Exceptions can implement the action interface to handle themselves. For anything else, use the default
-			$action   = ($e instanceof ActionInterface) ? $e : new Exception($e->getMessage());
-			$response = $this->dispatch($action);
-		}
+		$this->action = $this->getAction($this->request);
+		$response = $this->dispatch($this->request);
 
 		// --------------- Present
 		if (!($response instanceof Response)) {
-			try {
-				$response = $this->presenter->run(
-					$action->getData(),
-					$this->getMedia($action)->getValue(),
-					$action->getView()
-				);
-				$response->setStatusCode($action->getHttpCode());
-			} catch (\Exception $e) {
-				$content  = $this->debug_enabled ? $e->getMessage() : $this->errorHtmlResponse();
-				$response = new Response($content, 500, array('Content-Type' => 'text/html'));
-			}
+			$response = $this->present($response);
 		}
 
 		// --------------- Return
+		return $response;
+	}
+
+	/**
+	 * @param Request 		  $request
+	 * @param bool 			  $dispatch
+	 * @throws ExitDispatchException
+	 * @throws \Exception
+	 * @return mixed
+	 */
+	protected function dispatch(Request $request, $dispatch = true)
+	{
+		$response = null;
+		$action  = $this->action;
+		$dispatch && $this->events->dispatch(DispatchEvents::PRE_DISPATCH, new PreDispatchEvent($this->request, $action));
+		try {
+			$response = $action($request);
+		} catch (ActionInterface $exc) { // Re-dispatch if the exception implements ActionInterface (http://i.imgur.com/QKIfg.gif)
+			$this->action = $exc;
+			$response = $this->dispatch($request, false);	// Re-Dispatch without events
+		} catch (\Exception $exc) {
+			$dispatch && $this->events->dispatch(DispatchEvents::DISPATCH_ERROR, new DispatchErrorEvent($exc, $request));
+			if (!$dispatch) {
+				throw $exc;
+			}
+		}
+		$dispatch && $this->events->dispatch(DispatchEvents::POST_DISPATCH, new PostDispatchEvent($this->request, $action, $response));
+		return $response;
+	}
+
+	/**
+	 * @param $data
+	 * @throws Exception
+	 * @throws \Exception
+	 * @return Response
+	 */
+	protected function present($data)
+	{
+		$media_type = $this->getMedia($this->action)->getValue();
+
+		$this->events->dispatch(DispatchEvents::PRE_PRESENT, new PrePresentEvent($this->request, $this->action));
+		try {
+			$response = $this->presenter->run($data, $media_type, $this->action->getView());
+			$response->setStatusCode($this->action->getHttpCode());
+		} catch (\Exception $exc) {
+			$this->events->dispatch(DispatchEvents::DISPATCH_ERROR, new DispatchErrorEvent($exc, $this->request, $this->debug_enabled));
+			throw $exc;
+		}
+		$this->events->dispatch(DispatchEvents::POST_PRESENT, new PostPresentEvent($this->request, $response, $this->action));
+
 		return $response;
 	}
 
@@ -103,11 +157,17 @@ class Dispatch
 		return (bool)$this->matched_route;
 	}
 
+	/**
+	 * Toggle debugging on
+	 */
 	public function enableDebug()
 	{
 		$this->debug_enabled = true;
 	}
 
+	/**
+	 * Toggle debugging off
+	 */
 	public function disableDebug()
 	{
 		$this->debug_enabled = false;
@@ -126,20 +186,6 @@ class Dispatch
 		);
 
 		return $this->matched_route;
-	}
-
-	/**
-	 * Dispatch a request to an action and populate Response
-	 *
-	 * @param ActionInterface $action
-	 * @return Response
-	 */
-	protected function dispatch(ActionInterface $action)
-	{
-		// Run the response through the action.
-		$action->before($this->request);
-		$response = $action($this->request);
-		return $action->after($this->request, $response);
 	}
 
 	/**
@@ -168,7 +214,7 @@ class Dispatch
 	 * Attempt to match a route and instantiate an Action, bailing out with an exception on failure
 	 *
 	 * @param Request $request
-	 * @return ActionInterface|null
+	 * @return ActionInterface
 	 * @throws ActionNotFoundException
 	 * @throws PageNotFoundException
 	 */
@@ -177,7 +223,9 @@ class Dispatch
 		// Get the matched route.
 		$route = $this->matched_route ?: $this->matchRoute();
 		if (!$route) {
-			return $this->errorRouteNotMatched($request);
+			$exc = new PageNotFoundException();
+			$this->events->dispatch(DispatchEvents::DISPATCH_ERROR, new DispatchErrorEvent($exc, $request));
+			return $exc;
 		}
 
 		$params = $route->params;
@@ -185,49 +233,11 @@ class Dispatch
 		// Get the appropriate action.
 		$action = $this->action_factory->newInstance($params['action'], $params);
 		if (!$action) {
-			return $this->errorActionNotFound($params['action']);
+			$exc = new ActionNotFoundException();
+			$this->events->dispatch(DispatchEvents::DISPATCH_ERROR, new DispatchErrorEvent($exc, $request));
+			return $exc;
 		}
 
 		return $action;
-	}
-
-	/**
-	 * Logs the requested action and throws an ActionNotFoundException. This is
-	 * placed in a protected method so that children can override this behavior
-	 * as needed.
-	 *
-	 * @param string $action Action name
-	 * @throws Exceptions\ActionNotFoundException
-	 * @return null
-	 */
-	protected function errorActionNotFound($action)
-	{
-		throw new ActionNotFoundException($action);
-	}
-
-	/**
-	 * Returns a string to be sent to the browser in the event everything falls
-	 * to pieces. This is implemented in a protected method so that children
-	 * can override this behavior as needed.
-	 *
-	 * @return string
-	 */
-	protected function errorHtmlResponse()
-	{
-		return '<html><head><title>Oops! Something went wrong.</title></head><body>Oops! Looks like something went wrong.</body></html>';
-	}
-
-	/**
-	 * Logs the requested page and throws a PageNotFoundException. This is
-	 * placed in a protected method so that children can override this behavior
-	 * as needed.
-	 *
-	 * @param Request $request
-	 * @throws Exceptions\PageNotFoundException
-	 * @return null
-	 */
-	protected function errorRouteNotMatched(Request $request)
-	{
-		throw new PageNotFoundException;
 	}
 }
