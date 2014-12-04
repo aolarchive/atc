@@ -112,6 +112,9 @@ class Dispatch
 			$response = $this->dispatch($request, false);	// Re-Dispatch without events
 		} catch (\Exception $exc) {
 			$dispatch && $this->events->dispatch(DispatchEvents::DISPATCH_ERROR, new DispatchErrorEvent($exc, $request));
+			if (!$dispatch) {
+				throw $exc;
+			}
 		}
 		$dispatch && $this->events->dispatch(DispatchEvents::POST_DISPATCH, new PostDispatchEvent($this->request, $action, $response));
 		return $response;
