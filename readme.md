@@ -1,6 +1,6 @@
 # ATC, An Action-Based PHP Dispatching Library
 
-ATC is a small dispatching library for PHP built on Aura's routing package and Symfony's HttpFoundation and EventDispatcher. There are two things you should know about this library:
+ATC is a small dispatching library for PHP built on [Aura.Router](https://github.com/auraphp/Aura.Router) package and Symfony's [HttpFoundation](https://github.com/symfony/HttpFoundation) and [EventDispatcher](https://github.com/symfony/EventDispatcher). There are two things you should know about this library:
 
 1. Every single route matches to a single Action class.
 2. Exceptions thrown from the Action can implement the ActionInterface and become the new Action.
@@ -8,7 +8,6 @@ ATC is a small dispatching library for PHP built on Aura's routing package and S
 **"What's an action?"** You can think of an Action as a Controller with a single method. Rather than being responsible for many different routes/pages it is only responsible for a single route. 
 
 ## Usage
-
 The simplest possible way to use ATC is by just setting up a route and a corresponding action. Lets do a simple hello world for our home page with an Action called Index.
 
 ```php
@@ -96,7 +95,6 @@ class NotSignedInException extends \Aol\Atc\Exception
 The flexibility is unparalleled and the possibilities are endless.
 
 ## Setup
-
 The dispatch class itself can be instantiated with just a few dependencies.
 
 ```php
@@ -120,9 +118,7 @@ $response = $dispatch->run(); // Returns a symfony response object
 $response->send();
 ```
 
-
 ## Installing via Composer
-
 ATC supports PHP 5.4 or above. The recommended way to install ATC is through
 [Composer](http://getcomposer.org).
 
@@ -144,7 +140,6 @@ require 'vendor/autoload.php';
 ```
 
 ## FAQ
-
 **WTF is "ATC"?** It originally stood for "Air Traffic Control" but that's a lot of typing and doesn't roll off the tongue very well. 
 
 **How do I inject dependencies into my Action classes?** The included ActionFactory is just the bare bones, but you can inject your own factory into the Dispatcher as long as it implements the `ActionFactoryInterface`.
@@ -156,8 +151,7 @@ require 'vendor/autoload.php';
 **Will you add feature X?** Maybe, but you'll never know until you ask. Open up an issue and we'll discuss it and if you're interested in submitting a pull request check out the Contributing section below.
 
 ## Contributing
-ATC is an open source project and pull requests are welcome if you'd like to contribute. Please include full unit test coverage and any relevant documentation updates with your PR. This library attempts to comply with PSR-1, PSR-2, and PSR-4. If you notice compliance oversights, please send a patch via pull request.
+ATC is an open source project and pull requests are welcome if you'd like to contribute. Please include full unit test coverage and any relevant documentation updates with your PR.
 
 ## License
-
 ATC is licensed under the MIT License - see the LICENSE file for details
