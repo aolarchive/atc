@@ -1,6 +1,6 @@
 {
   "name": "aol/atc",
-  "description": "Air Traffic Control. Handles route dispatching using Aura components.",
+  "description": "ATC is a small dispatching library for PHP built on Aura.Router and Symfony's",
   "license": "MIT",
   "authors": [
     {
@@ -24,7 +24,6 @@
   "autoload": {
     "psr-4": {
       "Aol\\Atc\\": "src/",
-      "Aol\\AtcExample\\": "example/",
       "Aol\\Atc\\Tests\\": "tests/"
     }
   }
