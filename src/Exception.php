@@ -21,7 +21,7 @@ class Exception extends \Exception implements ActionInterface
 	 */
 	public function __invoke(Request $request)
 	{
-		$this->data['message'] = $this->getMessage();
+		return ['message' => $this->getMessage()];
 	}
 
 	/**
@@ -44,7 +44,7 @@ class Exception extends \Exception implements ActionInterface
 	 */
 	public function getAllowedFormats()
 	{
-		return ['text/html', 'application/json'];
+		return ['text/html', 'application/json', 'image/x-icon'];
 	}
 
 	/**
