@@ -7,7 +7,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class Exception extends \Exception implements ActionInterface
 {
-	protected $data = ['status' => 'error', 'message' => 'system error'];
+	protected $data = ['status' => 'error', 'message' => 'Internal Service Error'];
 	protected $http_code = 500;
 	protected $view = 'errors/500';
 
@@ -50,16 +50,6 @@ class Exception extends \Exception implements ActionInterface
 	public function getAllowedFormats()
 	{
 		return ['text/html', 'application/json', 'image/x-icon'];
-	}
-
-	/**
-	 * Returns the unformatted action data to be included in the response.
-	 *
-	 * @return array
-	 */
-	public function getData()
-	{
-		return $this->data;
 	}
 
 	/**
