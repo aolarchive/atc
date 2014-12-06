@@ -7,7 +7,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class Exception extends \Exception implements ActionInterface
 {
-	protected $data = ['status' => 'failure', 'message' => 'system error'];
+	protected $data = ['status' => 'error', 'message' => 'system error'];
 	protected $http_code = 500;
 	protected $view = 'errors/500';
 
@@ -21,7 +21,12 @@ class Exception extends \Exception implements ActionInterface
 	 */
 	public function __invoke(Request $request)
 	{
-		return ['message' => $this->getMessage()];
+		$message = $this->getMessage();
+		if (!empty($message)) {
+			$this->data['message'] = $message;
+		}
+
+		return $this->data;
 	}
 
 	/**
