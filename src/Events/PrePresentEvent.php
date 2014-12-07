@@ -8,22 +8,28 @@ use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Class PrePresentEvent
+ *
  * @package Aol\Atc\Events
  */
 class PrePresentEvent extends Event
 {
+	/** @var ActionInterface */
+	private $action;
+	/** @var mixed Presentation data */
+	private $data;
 	/** @var Request */
 	private $request;
 
-	/** @var ActionInterface */
-	private $action;
-
 	/**
-	 * @return Request
+	 * @param Request         $request
+	 * @param ActionInterface $action
+	 * @param mixed           $data
 	 */
-	public function getRequest()
+	public function __construct(Request $request, ActionInterface $action, $data)
 	{
-		return $this->request;
+		$this->request = $request;
+		$this->action  = $action;
+		$this->data    = $data;
 	}
 
 	/**
@@ -34,13 +40,21 @@ class PrePresentEvent extends Event
 		return $this->action;
 	}
 
-	/**
-	 * @param Request $request
-	 * @param ActionInterface $action
-	 */
-	public function __construct(Request $request, ActionInterface $action)
+	public function getData()
 	{
-		$this->request = $request;
-		$this->action  = $action;
+		return $this->data;
 	}
-} 
+
+	/**
+	 * @return Request
+	 */
+	public function getRequest()
+	{
+		return $this->request;
+	}
+
+	public function setData($data)
+	{
+		$this->data = $data;
+	}
+}

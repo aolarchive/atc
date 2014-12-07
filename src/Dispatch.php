@@ -130,7 +130,9 @@ class Dispatch
 	{
 		$media_type = $this->getMedia($this->action)->getValue();
 
-		$this->events->dispatch(DispatchEvents::PRE_PRESENT, new PrePresentEvent($this->request, $this->action));
+		$pre_present_event = new PrePresentEvent($this->request, $this->action, $data);
+		$this->events->dispatch(DispatchEvents::PRE_PRESENT, $pre_present_event);
+		$data = $pre_present_event->getData();
 		try {
 			$response = $this->presenter->run($data, $media_type, $this->action->getView());
 			$response->setStatusCode($this->action->getHttpCode());

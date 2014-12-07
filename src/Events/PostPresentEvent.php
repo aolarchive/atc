@@ -23,14 +23,6 @@ class PostPresentEvent extends Event
 	private $action;
 
 	/**
-	 * @return Request
-	 */
-	public function getRequest()
-	{
-		return $this->request;
-	}
-
-	/**
 	 * @param Request $request
 	 * @param Response $response
 	 * @param ActionInterface $action
@@ -41,4 +33,20 @@ class PostPresentEvent extends Event
 		$this->response = $response;
 		$this->action   = $action;
 	}
-} 
+
+	/**
+	 * @return Request
+	 */
+	public function getRequest()
+	{
+		return $this->request;
+	}
+
+	/**
+	 * @return Response
+	 */
+	public function getResponse()
+	{
+		return $this->response;
+	}
+}
