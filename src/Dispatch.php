@@ -104,9 +104,10 @@ class Dispatch
 	{
 		$response = null;
 		$action  = $this->action;
-		$dispatch && $this->events->dispatch(DispatchEvents::PRE_DISPATCH, new PreDispatchEvent($this->request, $action));
 		try {
+			$dispatch && $this->events->dispatch(DispatchEvents::PRE_DISPATCH, new PreDispatchEvent($this->request, $action));
 			$response = $action($request);
+			$dispatch && $this->events->dispatch(DispatchEvents::POST_DISPATCH, new PostDispatchEvent($this->request, $action, $response));
 		} catch (ActionInterface $exc) { // Re-dispatch if the exception implements ActionInterface (http://i.imgur.com/QKIfg.gif)
 			$this->action = $exc;
 			$response = $this->dispatch($request, false);	// Re-Dispatch without events
@@ -116,7 +117,6 @@ class Dispatch
 				throw $exc;
 			}
 		}
-		$dispatch && $this->events->dispatch(DispatchEvents::POST_DISPATCH, new PostDispatchEvent($this->request, $action, $response));
 		return $response;
 	}
 
@@ -130,17 +130,19 @@ class Dispatch
 	{
 		$media_type = $this->getMedia($this->action)->getValue();
 
-		$pre_present_event = new PrePresentEvent($this->request, $this->action, $data);
-		$this->events->dispatch(DispatchEvents::PRE_PRESENT, $pre_present_event);
-		$data = $pre_present_event->getData();
 		try {
+			$pre_present_event = new PrePresentEvent($this->request, $this->action, $data);
+			$this->events->dispatch(DispatchEvents::PRE_PRESENT, $pre_present_event);
+			$data = $pre_present_event->getData();
+
 			$response = $this->presenter->run($data, $media_type, $this->action->getView());
 			$response->setStatusCode($this->action->getHttpCode());
+
+			$this->events->dispatch(DispatchEvents::POST_PRESENT, new PostPresentEvent($this->request, $response, $this->action));
 		} catch (\Exception $exc) {
 			$this->events->dispatch(DispatchEvents::DISPATCH_ERROR, new DispatchErrorEvent($exc, $this->request, $this->debug_enabled));
 			throw $exc;
 		}
-		$this->events->dispatch(DispatchEvents::POST_PRESENT, new PostPresentEvent($this->request, $response, $this->action));
 
 		return $response;
 	}
