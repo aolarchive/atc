@@ -15,8 +15,7 @@ class ExceptionTest extends \PHPUnit_Framework_TestCase
 	{
 		$message = 'This is a test message';
 		$exc = new Exception($message);
-		$exc(new Request());
-		$data = $exc->getData();
+		$data = $exc(new Request());
 		$this->assertEquals($message, $data['message']);
 	}
 
@@ -42,4 +41,3 @@ class ExceptionTest extends \PHPUnit_Framework_TestCase
 	}
 }
 
- 
