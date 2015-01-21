@@ -1,12 +1,16 @@
 {
   "name": "aol/atc",
-  "description": "ATC is a small dispatching library for PHP built on Aura.Router and Symfony's",
+  "description": "ATC is a small dispatching library for PHP built on Aura.Router and Symfony's HTTP Foundation",
   "license": "MIT",
   "authors": [
     {
-      "name": "AOL",
-      "email": "amp@teamaol.com"
-    }
+      "name": "Jake A. Smith",
+      "email": "theman@jakeasmith.com"
+    },
+    {
+      "name": "Samantha Quiñones",
+      "email": " samantha@tembies.com"
+    },
   ],
   "minimum-stability": "stable",
   "require": {
