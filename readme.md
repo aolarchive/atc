@@ -98,10 +98,10 @@ The flexibility is unparalleled and the possibilities are endless.
 The dispatch class itself can be instantiated with just a few dependencies.
 
 ```php
-$router = new \Aura\Router\Router;
+$router = (new \Aura\Router\RouterFactory())->newInstance();
 $request = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
-$action_factory = new \Aol\Atc\ActionFactory('Your\\Namespace\\Prefix');
-$presenter = new \Aol\Atc\Presenter(__DIR__ . '/your/view/dir/';
+$action_factory = new \Aol\Atc\ActionFactory('Your\\Namespace\\Prefix\\');
+$presenter = new \Aol\Atc\Presenter(__DIR__ . '/your/view/dir/');
 $event_dispatcher = new \Aol\Atc\EventDispatcher;
 $exception_handler = new \Aol\Atc\EventHandlers\DispatchErrorHandler;
 
