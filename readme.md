@@ -1,4 +1,9 @@
 # ATC, An Action-Based PHP Dispatching Library
+[![Build Status](https://travis-ci.org/aol/atc.png)](https://travis-ci.org/aol/atc)
+[![Latest Stable Version](https://poser.pugx.org/aol/atc/v/stable.png)](https://packagist.org/packages/aol/atc)
+[![Latest Unstable Version](https://poser.pugx.org/aol/atc/v/unstable.png)](https://packagist.org/packages/aol/atc)
+[![Total Downloads](https://poser.pugx.org/aol/atc/downloads.png)](https://packagist.org/packages/aol/atc)
+[![Code Climate](https://codeclimate.com/github/aol/atc/badges/gpa.svg)](https://codeclimate.com/github/aol/atc)
 
 ATC is a small dispatching library for PHP built on [Aura.Router](https://github.com/auraphp/Aura.Router) package and Symfony's [HttpFoundation](https://github.com/symfony/HttpFoundation) and [EventDispatcher](https://github.com/symfony/EventDispatcher). There are two things you should know about this library:
 
