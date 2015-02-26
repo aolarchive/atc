@@ -2,7 +2,6 @@
 
 namespace Aol\Atc\Tests;
 
-
 use Aol\Atc\ActionFactory;
 use Aol\Atc\ActionInterface;
 use Aol\Atc\Dispatch;
@@ -22,7 +21,7 @@ use Symfony\Component\HttpFoundation\ServerBag;
 
 class ExceptionThrowingDummyAction extends \Aol\Atc\Action {
 	public function __invoke(Request $request) {
-		throw new Exception();
+		throw new \Exception();
 	}
 }
 
