@@ -237,7 +237,7 @@ class Dispatch
 		// Get the appropriate action.
 		$action = $this->action_factory->newInstance($params['action'], $params);
 		if (!$action) {
-			$exc = new ActionNotFoundException();
+			$exc = new ActionNotFoundException('Action not found: ' . $params['action']);
 			$this->events->dispatch(DispatchEvents::DISPATCH_ERROR, new DispatchErrorEvent($exc, $request));
 			return $exc;
 		}
