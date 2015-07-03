@@ -80,8 +80,12 @@ class Dispatch
 	 */
 	public function run()
 	{
-		// --------------- Dispatch
 		$this->action = $this->getAction($this->request);
+		return $this->process();
+	}
+
+	protected function process() {
+		// --------------- Dispatch
 		$response = $this->dispatch($this->request);
 
 		// --------------- Present
@@ -139,9 +143,13 @@ class Dispatch
 			$response->setStatusCode($this->action->getHttpCode());
 
 			$this->events->dispatch(DispatchEvents::POST_PRESENT, new PostPresentEvent($this->request, $response, $this->action));
+		} catch(Exception $e) {
+			$this->action = $e;
+			$response = $this->process();
 		} catch (\Exception $exc) {
 			$this->events->dispatch(DispatchEvents::DISPATCH_ERROR, new DispatchErrorEvent($exc, $this->request, $this->debug_enabled));
-			throw $exc;
+			$this->action = new Exception('Unknown presentation error');
+			$response = $this->process();
 		}
 
 		return $response;
