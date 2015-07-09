@@ -143,8 +143,9 @@ class Dispatch
 			$response->setStatusCode($this->action->getHttpCode());
 
 			$this->events->dispatch(DispatchEvents::POST_PRESENT, new PostPresentEvent($this->request, $response, $this->action));
-		} catch(Exception $e) {
-			$this->action = $e;
+		} catch(Exception $exc) {
+			$this->events->dispatch(DispatchEvents::DISPATCH_ERROR, new DispatchErrorEvent($exc, $this->request, $this->debug_enabled));
+			$this->action = $exc		;
 			$response = $this->process();
 		} catch (\Exception $exc) {
 			$this->events->dispatch(DispatchEvents::DISPATCH_ERROR, new DispatchErrorEvent($exc, $this->request, $this->debug_enabled));
