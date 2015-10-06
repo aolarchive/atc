@@ -26,7 +26,7 @@ class Index extends \Aol\Atc\Action
 {
     public function __invoke(Request $request)
     {
-        return new Response::create('Hello world');
+        return Response::create('Hello world');
     }
 }
 ```
@@ -42,7 +42,7 @@ class Index extends \Aol\Atc\Action
 {
     public function __invoke(Request $request)
     {
-        return new Response::create('Hello ' . $this->params['name']);
+        return Response::create('Hello ' . $this->params['name']);
     }
 }
 ```
@@ -92,7 +92,7 @@ class NotSignedInException extends \Aol\Atc\Exception
 {
     public function __invoke(Request $request)
     {
-        return RedirectResponse('/signin/');
+        return new RedirectResponse('/signin/');
     }
 }
 ```
