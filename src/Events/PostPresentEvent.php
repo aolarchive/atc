@@ -13,14 +13,14 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class PostPresentEvent extends Event
 {
+	/** @var ActionInterface */
+	private $action;
+
 	/** @var Request */
 	private $request;
 
 	/** @var Response */
 	private $response;
-
-	/** @var ActionInterface */
-	private $action;
 
 	/**
 	 * @param Request $request
@@ -32,6 +32,14 @@ class PostPresentEvent extends Event
 		$this->request  = $request;
 		$this->response = $response;
 		$this->action   = $action;
+	}
+
+	/**
+	 * @return ActionInterface
+	 */
+	public function getAction()
+	{
+		return $this->action;
 	}
 
 	/**
