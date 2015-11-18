@@ -9,6 +9,7 @@ use Aol\Atc\Events\PostPresentEvent;
 use Aol\Atc\Events\PreDispatchEvent;
 use Aol\Atc\Events\PrePresentEvent;
 use Aol\Atc\Exceptions\ActionNotFoundException;
+use Aol\Atc\Exceptions\DispatchException;
 use Aol\Atc\Exceptions\ExitDispatchException;
 use Aol\Atc\Exceptions\PageNotFoundException;
 use Aura\Accept\AcceptFactory;
@@ -47,6 +48,9 @@ class Dispatch
 
 	/** @var ActionInterface */
 	private $action;
+
+	/** @var null|callable A callable that should return */
+	private $dispatch_error;
 
 	/**
 	 * @param Router $router
@@ -98,28 +102,29 @@ class Dispatch
 	}
 
 	/**
-	 * @param Request 		  $request
-	 * @param bool 			  $dispatch
+	 * @param Request $request
+	 * @param bool    $events
 	 * @throws ExitDispatchException
 	 * @throws \Exception
 	 * @return mixed
 	 */
-	protected function dispatch(Request $request, $dispatch = true)
+	protected function dispatch(Request $request, $events = true)
 	{
 		$response = null;
 		$action  = $this->action;
 		try {
-			$dispatch && $this->events->dispatch(DispatchEvents::PRE_DISPATCH, new PreDispatchEvent($this->request, $action));
+			$events && $this->events->dispatch(DispatchEvents::PRE_DISPATCH, new PreDispatchEvent($this->request, $action));
 			$response = $action($request);
-			$dispatch && $this->events->dispatch(DispatchEvents::POST_DISPATCH, new PostDispatchEvent($this->request, $action, $response));
-		} catch (ActionInterface $exc) { // Re-dispatch if the exception implements ActionInterface (http://i.imgur.com/QKIfg.gif)
-			$this->action = $exc;
+			$events && $this->events->dispatch(DispatchEvents::POST_DISPATCH, new PostDispatchEvent($this->request, $action, $response));
+		} catch(ExitDispatchException $e) { // Break out of ATC
+			throw $e;
+		} catch (ActionInterface $e) { // Re-dispatch if the exception implements ActionInterface (http://i.imgur.com/QKIfg.gif)
+			$this->action = $e;
 			$response = $this->dispatch($request, false);	// Re-Dispatch without events
-		} catch (\Exception $exc) {
-			$dispatch && $this->events->dispatch(DispatchEvents::DISPATCH_ERROR, new DispatchErrorEvent($exc, $request));
-			if (!$dispatch) {
-				throw $exc;
-			}
+		} catch (\Exception $e) { // Nope. No chance of recovery here. Dispatch a default Action.
+			$events && $this->events->dispatch(DispatchEvents::DISPATCH_ERROR, new DispatchErrorEvent($e, $request));
+			$this->action = new DispatchException();
+			$response = $this->dispatch($request, false);
 		}
 		return $response;
 	}
