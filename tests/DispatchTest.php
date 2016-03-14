@@ -179,8 +179,8 @@ class DispatchTest extends \PHPUnit_Framework_TestCase
 		$this->setUpTestRun($case);
 		$case['route'] = $this->setUpRoute($case['route']);
 		$this->presenter->shouldReceive('run')->once()->withAnyArgs()->andThrow($case['response_obj']);
+		$this->presenter->shouldReceive('run')->once()->withAnyArgs()->andReturn(new Response('', 500));
 
-		$this->setExpectedException('Exception');
 		$this->event_dispatcher->shouldReceive('dispatch')->once()->with(DispatchEvents::DISPATCH_ERROR, \Mockery::type('Aol\\Atc\\Events\\DispatchErrorEvent'));
 		$response = $this->dispatch->run();
 		$this->assertEquals($case['status_code'], $response->getStatusCode());
